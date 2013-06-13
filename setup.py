@@ -46,6 +46,7 @@ setup(name=name,
           'zc.buildout',
           'cliff',
           'requests',
+          'sqlalchemy',
         ] + additional_install_requires,
       extra_requires={'docs': (
         'Sphinx',
