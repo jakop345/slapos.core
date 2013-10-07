@@ -418,8 +418,8 @@ class Computer(object):
     if alter_network:
       self._speedHackAddAllOldIpsToInterface()
 
-    try:
-      for partition_index, partition in enumerate(self.partition_list):
+    for partition_index, partition in enumerate(self.partition_list):
+      try:
         # Reconstructing User's
         partition.path = os.path.join(self.instance_root, partition.reference)
         partition.user.setPath(partition.path)
@@ -479,12 +479,15 @@ class Computer(object):
                 address['addr']))
             else:
               raise ValueError('Address %r is incorrect' % address['addr'])
-    finally:
-      if alter_network and create_tap and self.interface.attach_to_tap:
-        try:
-          self.partition_list[0].tap.detach()
-        except IndexError:
-          pass
+      except:
+        self.logger.error('Error while processing partition %s:\n%s' % (
+            partition.user.name, traceback.format_exc()))
+
+    if alter_network and create_tap and self.interface.attach_to_tap:
+      try:
+        self.partition_list[0].tap.detach()
+      except IndexError:
+        pass
 
 
 class Partition(object):
