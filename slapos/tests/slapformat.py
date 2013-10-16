@@ -498,6 +498,46 @@ class TestComputer(SlapformatMixin):
     ],
       self.fakeCallAndRead.external_command_list)
 
+  def test_construct_bad_partition_does_not_prevent_run(self):
+    """
+    Test that a bad partition does not prevent any good partitions to be
+    processed.
+    """
+    computer = slapos.format.Computer('computer',
+      interface=slapos.format.Interface(logger=self.test_result,
+                                        name='bridge',
+                                        ipv4_local_network='127.0.0.1/16'))
+    computer.instance_root = '/instance_root'
+    computer.software_root = '/software_root'
+    partition = slapos.format.Partition('partition', '/part_path',
+      slapos.format.User('testuser'), [], None)
+    partition.tap = slapos.format.Tap('tap')
+    computer.partition_list = [partition]
+    global INTERFACE_DICT
+    INTERFACE_DICT['bridge'] = {
+      socket.AF_INET: [{'addr': '192.168.242.77', 'broadcast': '127.0.0.1',
+        'netmask': '255.255.255.0'}],
+      socket.AF_INET6: [{'addr': '2a01:e35:2e27::e59c', 'netmask': 'ffff:ffff:ffff:ffff::'}]
+    }
+
+    computer.construct(alter_network=False, alter_user=False)
+    self.assertEqual([
+      "makedirs('/instance_root', 493)",
+      "makedirs('/software_root', 493)",
+      "chmod('/software_root', 493)",
+      "mkdir('/instance_root/partition', 488)",
+      "chmod('/instance_root/partition', 488)"
+    ],
+      self.test_result.bucket)
+    self.assertEqual([
+      'ip addr list bridge',
+      'ip addr add ip/255.255.255.255 dev bridge',
+      # 'ip addr list bridge',
+      'ip addr add ip/ffff:ffff:ffff:ffff:: dev bridge',
+      'ip -6 addr list bridge',
+    ],
+      self.fakeCallAndRead.external_command_list)
+
 
 class TestPartition(SlapformatMixin):
 
