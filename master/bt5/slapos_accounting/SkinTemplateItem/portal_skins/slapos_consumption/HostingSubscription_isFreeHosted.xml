@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<ZopeData>
+  <record id="1" aka="AAAAAAAAAAE=">
+    <pickle>
+      <global name="PythonScript" module="Products.PythonScripts.PythonScript"/>
+    </pickle>
+    <pickle>
+      <dictionary>
+        <item>
+            <key> <string>Script_magic</string> </key>
+            <value> <int>3</int> </value>
+        </item>
+        <item>
+            <key> <string>_bind_names</string> </key>
+            <value>
+              <object>
+                <klass>
+                  <global name="NameAssignments" module="Shared.DC.Scripts.Bindings"/>
+                </klass>
+                <tuple/>
+                <state>
+                  <dictionary>
+                    <item>
+                        <key> <string>_asgns</string> </key>
+                        <value>
+                          <dictionary>
+                            <item>
+                                <key> <string>name_container</string> </key>
+                                <value> <string>container</string> </value>
+                            </item>
+                            <item>
+                                <key> <string>name_context</string> </key>
+                                <value> <string>context</string> </value>
+                            </item>
+                            <item>
+                                <key> <string>name_m_self</string> </key>
+                                <value> <string>script</string> </value>
+                            </item>
+                            <item>
+                                <key> <string>name_subpath</string> </key>
+                                <value> <string>traverse_subpath</string> </value>
+                            </item>
+                          </dictionary>
+                        </value>
+                    </item>
+                  </dictionary>
+                </state>
+              </object>
+            </value>
+        </item>
+        <item>
+            <key> <string>_body</string> </key>
+            <value> <string>"""\n
+  Sample script which charges for resilient setups on public computers.\n
+"""\n
+if context.getSlapState() not in ["start_requested", "stop_requested"]: \n
+  return 1\n
+\n
+# the "resilient" and "kvm-resilient" should come from Product Individual Variation,\n
+# of the sofware product.\n
+# XXX Hardcoded\n
+if context.getSourceReference() not in ["resilient", "kvm-resilient"]:\n
+  return 1\n
+\n
+free = 1\n
+# We don\'t charge for unpublished SR.\n
+software_release_url = context.getUrlString()\n
+software_release = context.portal_catalog.getResultValue(\n
+                     url_string=software_release_url, \n
+                     validation_state="published")\n
+\n
+if software_release is not None:\n
+  software_product = software_release.getAggregateValue()\n
+  if software_product.getValidationState() == "published":\n
+    free = 0\n
+\n
+if free:\n
+  return 0\n
+\n
+# Only charge if HS is hosted in public servers.\n
+software_instance_list = context.getSpecialiseRelatedValueList(portal_type="Software Instance")\n
+for software_instance in software_instance_list:\n
+  computer_partition = software_instance.getAggregateValue()\n
+  if computer_partition is not None and computer_partition.getAllocationScope() == "open/public":\n
+    return 0\n
+\n
+return 1\n
+</string> </value>
+        </item>
+        <item>
+            <key> <string>_params</string> </key>
+            <value> <string></string> </value>
+        </item>
+        <item>
+            <key> <string>id</string> </key>
+            <value> <string>HostingSubscription_isFreeHosted</string> </value>
+        </item>
+      </dictionary>
+    </pickle>
+  </record>
+</ZopeData>

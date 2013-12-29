@@ -58,7 +58,9 @@ portal = context.getPortalObject()\n
 \n
 business_process_uid_list = [\n
   portal.business_process_module.slapos_consumption_business_process.getUid(),\n
-  portal.business_process_module.slapos_subscription_business_process.getUid()]\n
+  portal.business_process_module.slapos_subscription_business_process.getUid(), \n
+  portal.business_process_module.slapos_hosting_business_process.getUid(),\n
+]\n
 specialise_reference_list = [q.getReference() for q in portal.portal_catalog(specialise_uid=business_process_uid_list,\n
   portal_type=\'Sale Trade Condition\')]\n
 \n
@@ -93,6 +95,8 @@ for movement in movement_list:\n
   )\n
   if movement.getResource() == \'service_module/slapos_instance_subscription\':\n
      temp_movement.edit(price=0.83612040133800003)\n
+  elif movement.getResource() == \'service_module/slapos_instance_hosting\':\n
+     temp_movement.edit(price=1.672240802676)\n
   else:\n
      temp_movement.edit(price=0.0)\n
   temp_movement_list.append(temp_movement)\n
